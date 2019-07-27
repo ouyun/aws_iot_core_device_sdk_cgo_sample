@@ -1,0 +1,1 @@
+In this folder, you should provide aws iot core credentials for your own device including a device certificate file, a device private key and an aws root certificate file.
