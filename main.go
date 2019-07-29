@@ -132,9 +132,6 @@ func main() {
 
 	var rc C.IoT_Error_t = C.FAILURE
 
-	var paramsQOS0 C.IoT_Publish_Message_Params
-	var paramsQOS1 C.IoT_Publish_Message_Params
-
 	fmt.Printf("AWS IoT SDK Version %d.%d.%d-%s\n", C.VERSION_MAJOR, C.VERSION_MINOR, C.VERSION_PATCH, C.VERSION_TAG)
 
 	currentDir, err := os.Executable()
@@ -204,14 +201,6 @@ func main() {
 	payLoad := bytes.NewBuffer(make([]byte, 30))
 	fmt.Fprintf(payLoad, "%s : %d ", "hello from SDK", i)
 
-	paramsQOS0.qos = C.QOS0
-	paramsQOS0.payload = unsafe.Pointer(&payLoad.Bytes()[0])	//The C type void* is represented by Go's unsafe.Pointer.
-	paramsQOS0.isRetained = C.uint8_t(0)
-
-	paramsQOS1.qos = C.QOS1
-	paramsQOS1.payload = unsafe.Pointer(&payLoad.Bytes()[0])	//The C type void* is represented by Go's unsafe.Pointer.
-	paramsQOS1.isRetained = C.uint8_t(0)
-
 	mqtt.pubmsgParm0.qos = C.QOS0
 	mqtt.pubmsgParm0.payload = unsafe.Pointer(&payLoad.Bytes()[0])	//The C type void* is represented by Go's unsafe.Pointer.
 	mqtt.pubmsgParm0.isRetained = C.uint8_t(0)
@@ -238,7 +227,6 @@ func main() {
 		payLoad.Reset()
 		fmt.Fprintf(payLoad, "%s : %d ", "hello from SDK", i); i++
 		s := string(payLoad.Bytes()[:])
-		paramsQOS0.payloadLen = C.size_t(len(payLoad.Bytes()))
 		mqtt.pubmsgParm0.payloadLen = C.strlen(C.CString(s))
 		rc = C.aws_iot_mqtt_publish(mqtt.awsCli, C.CString("sdkTest/sub"), 11, mqtt.pubmsgParm0)
 		if publishCount > 0 {
@@ -248,7 +236,6 @@ func main() {
 		payLoad.Reset()
 		fmt.Fprintf(payLoad, "%s : %d ", "hello from SDK", i); i++
 		s = string(payLoad.Bytes()[:])
-		paramsQOS1.payloadLen = C.size_t(len(payLoad.Bytes()))
 		mqtt.pubmsgParm1.payloadLen = C.strlen(C.CString(s))
 		rc = C.aws_iot_mqtt_publish(mqtt.awsCli, C.CString("sdkTest/sub"), 11, mqtt.pubmsgParm1)
 		if rc == C.MQTT_REQUEST_TIMEOUT_ERROR {
