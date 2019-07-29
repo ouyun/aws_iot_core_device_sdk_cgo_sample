@@ -77,7 +77,11 @@ func disconCallbackHandler(pClient *C.AWS_IoT_Client, data unsafe.Pointer) {
 	fmt.Println("MQTT Disconnect")
 	var rc C.IoT_Error_t = C.FAILURE
 
-	fmt.Printf("disconnect info:[%v]", data)
+	if C.NULL == unsafe.Pointer(pClient) {
+		return
+	}
+
+	fmt.Println("disconnect info:[%v]", data)
 
 	if C.aws_iot_is_autoreconnect_enabled(pClient) {
 		fmt.Println("Auto Reconnect is enabled, Reconnecting attempt will start now")
@@ -148,7 +152,7 @@ func main() {
 	fmt.Printf("clientCRT\t%s\n", clientCRT)
 	fmt.Printf("clientKey\t%s\n", clientKey)
 
-	mqtt.initPara.enableAutoReconnect = C.bool(false)
+	mqtt.initPara.enableAutoReconnect = C.bool(false) // We enable this later below
 	mqtt.initPara.pHostURL = C.CString(AwsIotMqttHost)
 	mqtt.initPara.port = C.uint16_t(AwsIotMqttPort)
 	mqtt.initPara.pRootCALocation = C.CString(rootCA)
